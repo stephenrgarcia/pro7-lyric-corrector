@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Local Claude Code settings (machine/session specific)
+.claude/settings.local.json
+
+# Local runtime state (lives outside the repo by default; ignore if symlinked in)
+*.log
+state.json
+ambiguous_queue.jsonl
+
+# Never commit backups or real library data dumps
+backups/
+*.pro.bak
