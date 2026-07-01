@@ -28,9 +28,9 @@ with zero third-party dependencies.
 
 The spec called for GreyShirtGuy's `ProPresenter7-Proto` + `protoc`-generated
 classes. On the target machine that path is **not installable**: the system
-Python (3.9.6) has no `protobuf`/`grpc_tools`, there is no `protoc`, and there
-is no network at runtime. Depending on `pip`-installed packages would also make
-an always-on LaunchAgent fragile (OS updates wipe them).
+Python environment has no `protobuf`/`grpc_tools`, there is no guaranteed
+`protoc`, and there is no network at runtime. Depending on `pip`-installed
+packages would also make the always-on helper fragile across macOS and Windows.
 
 Instead, `pro7corrector/wire.py` is a **dependency-free protobuf wire-format
 codec**. The deciding evidence: parsing every `.pro` in the library and
@@ -51,7 +51,7 @@ that could drift. See the "deviation" note in `docs/HANDOFF.md`.
 | `backup.py` | Timestamped backups, manifest, atomic writes, restore. |
 | `monitor.py` | The engine: scan/gate/correct/backup/write/log; fail-closed; cache; deferral. |
 | `config.py` | Root/library discovery, ProPresenter-running detection, paths. |
-| `agent.py` | LaunchAgent plist build + `launchctl` start/stop/status. |
+| `agent.py` | macOS LaunchAgent or Windows Task Scheduler install/start/stop/status. |
 | `aibatch.py` | Optional AI pass: emit tasks, validate + apply proposals. |
 
 ## The wire codec (`wire.py`)

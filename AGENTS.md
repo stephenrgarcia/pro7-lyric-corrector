@@ -7,8 +7,8 @@ Continue, Junie, Kiro, Devin, Windsurf, Firebase Studio, and OpenHands adapters
 all point back here. Read this file before changing anything.
 
 `pro7_lyric_corrector` — a one-time or always-on ProPresenter 7 worship-lyric
-autocorrector for macOS, scoped to the **Songs** library. Pure Python 3 standard
-library, **zero dependencies** (runs on the system `/usr/bin/python3`).
+autocorrector for macOS and Windows, scoped to the **Songs** library. Pure
+Python 3 standard library, **zero dependencies**.
 
 ## Read these first
 - `README.md` — user-facing: what it does and how to install it.
@@ -20,7 +20,8 @@ library, **zero dependencies** (runs on the system `/usr/bin/python3`).
 ## How it's built (two layers)
 1. **Deterministic engine** (no AI, no network): scan → gate → correct → back up
    → atomic in-place write → structural verify → log. Drives both `apply-once`
-   (one pass) and `watch` (always-on ~5s poll via a macOS LaunchAgent).
+   (one pass) and `watch` (always-on ~5s poll via a macOS LaunchAgent or
+   Windows Task Scheduler task).
 2. **AI pass** (optional): the deterministic engine *flags* ambiguous casing it
    can't decide; `ai-batch` emits those songs as JSON, an assistant following
    `docs/ROUTINE.md` proposes fixes, and `ai-batch --apply` validates and writes
@@ -28,7 +29,8 @@ library, **zero dependencies** (runs on the system `/usr/bin/python3`).
 
 ## Essentials
 - Run tests: `python3 tests/run_tests.py` (no pytest; pure stdlib).
-- Use `/usr/bin/python3`. Never add a pip dependency — keep it dependency-free.
+- Use Python 3 (`/usr/bin/python3` on macOS; `py`/`python` on Windows). Never
+  add a pip dependency — keep it dependency-free.
 - Entry point: `pro7_lyric_corrector.py`. Package: `pro7corrector/`.
 - Commands: `discover`, `inspect <file>`, `calibrate` (preview), `review`
   (approve one-by-one before writing), `apply-once`, `watch`, `install-agent`,
@@ -45,8 +47,8 @@ library, **zero dependencies** (runs on the system `/usr/bin/python3`).
 - `changelog.py` — append every edit to `EDIT-LOG.md` (fail-soft).
 - `reviewed.py` — fingerprints lyrics so the AI pass only sees changed songs.
 - `aibatch.py` — emit / apply the AI proposals (hard validation on apply).
-- `agent.py` — install/start/stop the macOS LaunchAgent.
-- `config.py` — root/library discovery, paths, ProPresenter-running detection.
+- `agent.py` — install/start/stop the macOS LaunchAgent or Windows scheduled task.
+- `config.py` — cross-platform root/library discovery, paths, ProPresenter-running detection.
 
 ## Hard rules (don't regress)
 - Edit **RTF leaves only** — ProPresenter renders from the RTF, not the sibling
@@ -81,10 +83,12 @@ library, **zero dependencies** (runs on the system `/usr/bin/python3`).
   `tests/run_tests.py`.
 
 ## Safety model
-Backups go to `~/Documents/ProPresenter Backups/lyric-corrector/` (with a
-`manifest.jsonl`), outside the library; restore via `--restore`. The always-on
-agent needs Full Disk Access granted to `/usr/bin/python3` (it touches
-`~/Documents`). Special-glyph payloads and non-songs are skipped, never mangled.
+Backups go to the user's Documents folder under
+`ProPresenter Backups/lyric-corrector/` (with a `manifest.jsonl`), outside the
+library; restore via `--restore`. On macOS the always-on agent needs Full Disk
+Access granted to `/usr/bin/python3` (it touches `~/Documents`); on Windows it
+uses Task Scheduler. Special-glyph payloads and non-songs are skipped, never
+mangled.
 
 ## AI IDE compatibility files
 Keep this file as the source of truth. Compatibility starters should stay short

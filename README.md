@@ -7,9 +7,9 @@ vice-versa), `colour`/`Saviour`, stray Capitals In The Middle of lines, or
 twelve different ways of writing the same chorus.
 
 Run it once, review changes before writing, or let it run quietly in the
-background on your Mac. In always-on mode, when you add or edit a song and close
-ProPresenter, it tidies the lyrics within a few seconds — backing up every file
-first.
+background on your Mac or Windows PC. In always-on mode, when you add or edit a
+song and close ProPresenter, it tidies the lyrics within a few seconds —
+backing up every file first.
 
 > 💝 This is a gift to the worship-tech community. It's free, open, and there's
 > nothing to buy. Use it, share it, change it.
@@ -20,8 +20,10 @@ first.
 
 You'll need:
 
-- **A Mac** (macOS). *This does not run on Windows.*
+- **A Mac or Windows PC.**
 - **ProPresenter 7**, with your songs in a library called **Songs** (the default).
+- **Python 3.** macOS can use the system `python3`; Windows users can install
+  Python 3 from python.org or use the Python launcher (`py`).
 - A few minutes for setup. The easiest path is to let your AI coding assistant
   run the Terminal commands for you; the copy/paste Terminal steps are still
   included below if you prefer to do it yourself.
@@ -127,7 +129,7 @@ always-on helper**.
 ### Setup with an AI IDE (easiest)
 
 Use any local AI coding assistant that can read this folder and run Terminal
-commands on the Mac that has your ProPresenter library. Good options include
+commands on the computer that has your ProPresenter library. Good options include
 Claude Code, Codex, Cursor, VS Code with GitHub Copilot, Windsurf, Cline, Roo
 Code, Continue, Gemini CLI, Qwen Code, Kiro, Junie, Devin, and
 Hermes-compatible workflows. Availability and pricing vary by tool.
@@ -139,7 +141,7 @@ Hermes-compatible workflows. Availability and pricing vary by tool.
 4. Paste this prompt:
 
 ```
-Please set up this ProPresenter lyric corrector on this Mac.
+Please set up this ProPresenter lyric corrector on this computer.
 
 Read AGENTS.md and README.md first. Do not add dependencies. Only touch the
 ProPresenter Songs library.
@@ -151,29 +153,34 @@ First ask me to choose:
 
 Then follow my choice using these commands:
 1. Confirm this folder contains pro7_lyric_corrector.py.
-2. Run: python3 pro7_lyric_corrector.py discover
-3. For a normal no-write preview, run:
+2. Use `python3` on macOS, or `py` on Windows. If `py` is unavailable on
+   Windows, try `python`.
+3. Run: python3 pro7_lyric_corrector.py discover
+4. For a normal no-write preview, run:
    python3 pro7_lyric_corrector.py calibrate
-4. For a full no-write draft of every proposed change, run:
+5. For a full no-write draft of every proposed change, run:
    python3 pro7_lyric_corrector.py calibrate --all --per-file 0
-5. For one-by-one review before writing anything, run:
+6. For one-by-one review before writing anything, run:
    python3 pro7_lyric_corrector.py review
-6. For direct one-time live cleanup after I confirm, run:
+7. For direct one-time live cleanup after I confirm, run:
    python3 pro7_lyric_corrector.py apply-once
-7. Only if I choose always-on cleanup, install and start the helper:
+8. Only if I choose always-on cleanup, install and start the helper:
    python3 pro7_lyric_corrector.py install-agent
    python3 pro7_lyric_corrector.py start
    python3 pro7_lyric_corrector.py status
 
 If ProPresenter is open, stop and tell me to quit it before writing. If I choose
-always-on cleanup, remind me to grant Full Disk Access to /usr/bin/python3.
+always-on cleanup on macOS, remind me to grant Full Disk Access to
+/usr/bin/python3. On Windows, remind me that install-agent creates a Task
+Scheduler task.
 ```
 
-5. When the assistant reaches the Full Disk Access step, do that part yourself:
+5. On macOS, when the assistant reaches the Full Disk Access step, do that part yourself:
    open **System Settings → Privacy & Security → Full Disk Access**, click **+**,
    press **⌘⇧G**, type `/usr/bin/python3`, press Return, and **Add** it. Make
    sure its switch is **on**. This is only needed for the always-on background
-   helper.
+   helper. Windows does not use Full Disk Access; the helper is installed with
+   Task Scheduler.
 
 If you choose one-time cleanup, you're done after `apply-once` or `review`
 finishes. If you choose always-on cleanup, you're set once `status` says the
@@ -188,23 +195,27 @@ Prefer to do it yourself? Copy/paste each command below.
 ### Step 0 — Make a safety copy (optional but smart)
 
 The tool backs up every file it changes, but for total peace of mind you can
-make your own copy of your library first: in **Finder**, go to
-`~/Documents/ProPresenter/Libraries/`, right-click the **Songs** folder →
-**Compress**. Keep that `.zip` somewhere safe.
+make your own copy of your library first: go to your ProPresenter Libraries
+folder, right-click the **Songs** folder, and compress/copy it somewhere safe.
+The default location is usually `~/Documents/ProPresenter/Libraries/` on macOS
+or `%USERPROFILE%\Documents\ProPresenter\Libraries\` on Windows.
 
 Also: **quit ProPresenter** before the one-time cleanup.
 
-### Step 1 — Put the tool on your Mac
+### Step 1 — Put the tool on your computer
 
 Download/unzip (or clone) this folder somewhere you'll remember, e.g. your
 Documents folder. The whole thing is one folder containing
 `pro7_lyric_corrector.py` and a `pro7corrector/` folder.
 
-### Step 2 — Open Terminal *in that folder*
+### Step 2 — Open Terminal or PowerShell *in that folder*
 
-Open the **Terminal** app (Applications → Utilities → Terminal). Type `cd `
-(with a space), then **drag the tool's folder from Finder onto the Terminal
-window** and press **Return**. Your prompt should now show the folder name.
+On macOS, open the **Terminal** app. On Windows, open **PowerShell**. Type
+`cd ` (with a space), then drag the tool's folder onto the Terminal/PowerShell
+window and press **Return/Enter**. Your prompt should now show the folder name.
+
+The commands below use `python3`. On Windows, replace `python3` with `py` (or
+`python` if that is how Python is installed).
 
 Check it works (this only reads, changes nothing):
 
@@ -212,9 +223,9 @@ Check it works (this only reads, changes nothing):
 python3 pro7_lyric_corrector.py discover
 ```
 
-> If macOS asks to **install developer tools** ("command line developer
-> tools"), click **Install** and wait, then run the command again. That's the
-> one-time install of Python that ships with macOS.
+> On macOS, if the system asks to **install developer tools**, click **Install**
+> and wait, then run the command again. On Windows, if `py`/`python` is not
+> found, install Python 3 and reopen PowerShell.
 
 You should see it find your ProPresenter and your Songs library.
 
@@ -276,22 +287,25 @@ python3 pro7_lyric_corrector.py status
 
 `status` should say it's **running**.
 
-### Step 6 — Grant Full Disk Access (required for always-on mode)
+### Step 6 — Platform permission / background helper notes
 
-Your library lives in `~/Documents`, which macOS protects. The background helper
-can't touch it until you allow it **once**:
+On macOS, your library lives in `~/Documents`, which macOS protects. The
+background helper can't touch it until you allow it **once**:
 
 1. Open **System Settings → Privacy & Security → Full Disk Access**.
 2. Click **+**, press **⌘⇧G**, type `/usr/bin/python3`, press Return, and **Add**
    it.
 3. Make sure its switch is **on**.
 
+On Windows, `install-agent` creates a Task Scheduler task named
+`Pro7LyricCorrector`; no Full Disk Access step is needed.
+
 That's it — the helper now corrects songs automatically. **Everyday rhythm:**
 edit songs in ProPresenter → **close ProPresenter** → within a few seconds your
 new/edited songs are corrected (and backed up). Reopen any time.
 
-> Prefer not to grant Full Disk Access? You can instead run the watcher by hand
-> in a Terminal window whenever you want it active:
+> Prefer not to install the background helper? You can instead run the watcher
+> by hand in a Terminal/PowerShell window whenever you want it active:
 > `python3 pro7_lyric_corrector.py watch` (leave the window open; press
 > **Ctrl-C** to stop).
 
@@ -302,7 +316,7 @@ new/edited songs are corrected (and backed up). Reopen any time.
 This adds the *judgment* calls the basic tool leaves alone (e.g. lowercasing
 "your" when it's the listener's, capitalizing "You" when it's God). **Totally
 optional.** It needs an AI coding assistant that can read local files and run
-Terminal commands, and it must run **on the Mac that has your library** (it
+Terminal commands, and it must run **on the computer that has your library** (it
 needs local file access). Examples include Claude Code, Codex, Gemini CLI,
 Qwen Code, Cursor, Copilot coding agent, Cline, Roo, Continue, Kiro, Junie,
 Devin, Windsurf, and Hermes-compatible workflows. Availability and pricing vary
@@ -337,8 +351,8 @@ them through the same safe pipeline (backup → verify → log), and report what
 changed. (Quit ProPresenter first, or it will safely defer.)
 
 **D. (Advanced) Schedule it nightly.** Some assistants can run on a schedule, or
-you can use the Mac's built-in scheduler to launch the assistant with the prompt
-above (e.g. nightly at 3 AM). The pass is cheap to run repeatedly because it
+you can use your operating system's scheduler to launch the assistant with the
+prompt above (e.g. nightly at 3 AM). The pass is cheap to run repeatedly because it
 **only looks at songs whose lyrics changed since the last run** — usually just
 the few you edited that week. If nothing changed, it does nothing.
 
@@ -349,8 +363,8 @@ the few you edited that week. If nothing changed, it does nothing.
 
 ## Undo / restore
 
-Every changed file has a timestamped backup in
-`~/Documents/ProPresenter Backups/lyric-corrector/`.
+Every changed file has a timestamped backup in your Documents folder under
+`ProPresenter Backups/lyric-corrector/`.
 
 - **Restore one song** to its pre-change version:
   ```bash
@@ -358,7 +372,7 @@ Every changed file has a timestamped backup in
   ```
   (Use a filename from the backups folder.)
 - **Restore by hand:** copy the `.pro.bak` file over the original `.pro` in
-  `~/Documents/ProPresenter/Libraries/Songs/` (and remove the `.bak`).
+  your `Documents/ProPresenter/Libraries/Songs/` folder (and remove the `.bak`).
 - **See exactly what changed and why:** open `EDIT-LOG.md` in this folder — it's
   a running, plain-text history of every edit.
 
@@ -391,10 +405,10 @@ then `apply-once`. There are tests: `python3 tests/run_tests.py`.
 
 - **"It's not correcting my songs automatically."** The background helper only
   writes when **ProPresenter is closed**. Close it and wait ~5 seconds. Also
-  confirm Full Disk Access (Step 6) and `status` shows *running*.
-- **"`python3` says command not found / wants to install tools."** Click
-  **Install** when macOS prompts, then retry. The tool uses the Python that
-  comes with macOS at `/usr/bin/python3`.
+  confirm Step 6 is complete and `status` shows *running*.
+- **"`python3` / `py` says command not found."** On macOS, click **Install**
+  if prompted for developer tools, then retry. On Windows, install Python 3 and
+  reopen PowerShell.
 - **"It didn't touch some songs."** It only edits the **Songs** library and
   skips non-song files and songs with characters it can't safely re-encode (it
   logs why).
@@ -422,7 +436,7 @@ wider ProPresenter community — **not for sale, not for profit, no strings.** I
 it blesses your Sunday, pass it on. Improvements and fixes are welcome.
 
 Pure Python 3 standard library — **zero dependencies**, nothing to install
-beyond the Python that ships with macOS.
+beyond Python itself.
 
 *Developers:* see `AGENTS.md` and `docs/ARCHITECTURE.md` (how the `.pro` format
 is parsed and edited safely). AI IDE starter files are listed in

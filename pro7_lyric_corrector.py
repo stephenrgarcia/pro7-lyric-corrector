@@ -308,13 +308,15 @@ def cmd_watch(args):
 def cmd_install_agent(args):
     root = config.choose_root(args.root)
     script = os.path.abspath(__file__)
-    # Prefer the stable system interpreter path -- it is the one the user grants
-    # Full Disk Access to in System Settings.
-    py = "/usr/bin/python3" if os.path.exists("/usr/bin/python3") else sys.executable
+    # On macOS prefer the stable system interpreter path -- it is the one the
+    # user grants Full Disk Access to in System Settings. On Windows, use the
+    # interpreter running this installer so Task Scheduler points at a real exe.
+    py = ("/usr/bin/python3" if config._is_macos()
+          and os.path.exists("/usr/bin/python3") else sys.executable)
     p = agent.install(py, script, root, args.library,
                       interval=args.interval,
                       override_while_open=args.override_while_open)
-    print("Installed LaunchAgent plist: %s" % p)
+    print("Installed background helper: %s" % p)
     print("Scoped to: %s" % config.songs_library_path(root, args.library))
     print("Start it with:  %s start" % os.path.basename(script))
     return 0
@@ -331,7 +333,7 @@ def cmd_stop(args):
 
 
 def cmd_status(args):
-    print("LaunchAgent: %s" % agent.status())
+    print("Background helper: %s" % agent.status())
     print("ProPresenter running: %s" % config.is_propresenter_running())
     return 0
 

@@ -1,8 +1,10 @@
-You are the nightly worship-lyric AI pass for the ProPresenter Songs library on this Mac. Run the steps below, then stop. Only ever touch song files in the Songs library — never sermons, announcements, playlists, media, themes, or any other library.
+You are the nightly worship-lyric AI pass for the ProPresenter Songs library on this computer. Run the steps below, then stop. Only ever touch song files in the Songs library — never sermons, announcements, playlists, media, themes, or any other library.
 
 Step 1 — Get the queue of flagged songs. From this project's folder (the one
 containing pro7_lyric_corrector.py), run:
   python3 pro7_lyric_corrector.py ai-batch
+
+On Windows, use `py` instead of `python3` if that is how Python is installed.
 
 This prints JSON: {"tasks": [ {"file","title","rules","slides":[{"index","text"}, ...]}, ... ]}. Each task is one song the always-on deterministic corrector flagged for a judgment call it can't make safely — ambiguous divine capitalization, or a word-initial single quote that might be an opening quote rather than an apostrophe. The queue only ever contains songs that are NEW or whose lyrics CHANGED since the last AI run — never the whole library — so on a normal night this is a short list. If "tasks" is empty, report "nothing flagged tonight" and stop.
 
@@ -39,6 +41,8 @@ Step 3 — Write a proposals file named "proposals.json" in this project's folde
 
 Step 4 — Apply with validation, backups, and queue clearing. From this project's folder, run:
   python3 pro7_lyric_corrector.py ai-batch --apply proposals.json --clear-queue
+
+On Windows, use `py` instead of `python3` if that is how Python is installed.
 
 The script validates every proposal (rejects paraphrase, slide-count/line-break/length mismatches), backs up each file, writes atomically, re-verifies the protobuf structure, and appends every applied edit to the repo's permanent record at "EDIT-LOG.md" (the same log the always-on deterministic corrector writes to). It is fail-closed: if ProPresenter is open it will print "DEFER (ProPresenter open)" and skip those files.
 

@@ -1,8 +1,8 @@
 """The correction engine: scan, gate, correct, back up, atomically write, log.
 
 Used by both `apply-once` (one pass) and `watch` (always-on poll loop). No third-
-party dependencies -- the watcher polls file signatures so it runs reliably under
-a LaunchAgent on the bare system Python.
+party dependencies -- the watcher polls file signatures so it runs reliably as a
+macOS LaunchAgent or Windows scheduled task on bare Python.
 """
 
 from __future__ import annotations

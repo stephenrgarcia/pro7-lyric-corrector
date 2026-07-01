@@ -4,7 +4,7 @@ Use `AGENTS.md` as the canonical project guide. This file exists for tools that
 load repository convention files.
 
 Quick invariants:
-- Pure Python standard library only; use `/usr/bin/python3`.
+- Pure Python standard library only; use Python 3 (`/usr/bin/python3` on macOS; `py`/`python` on Windows).
 - Never add a pip dependency.
 - Run `python3 tests/run_tests.py` after code, parser, rules, or write-path changes.
 - Edit ProPresenter RTF leaves only, never stale sibling plain-text fields.

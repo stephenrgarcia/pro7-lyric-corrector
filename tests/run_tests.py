@@ -13,7 +13,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 FIX = os.path.join(ROOT, "tests", "fixtures")
 
-from pro7corrector import wire, rtf, rules, presentation, song_gate, reviewed  # noqa
+from pro7corrector import (  # noqa
+    wire, rtf, rules, presentation, song_gate, reviewed, config, agent
+)
 
 _passed = 0
 _failed = 0
@@ -239,6 +241,8 @@ print("\n[gate] non-song detection")
 check("Sermon.pro name skipped",
       not song_gate.classify("/x/Sermon.pro", ag)[0])
 check("real song passes gate", song_gate.classify("/x/Amazing Grace.pro", ag)[0])
+check("uppercase .PRO extension passes gate",
+      song_gate.classify("/x/Amazing Grace.PRO", ag)[0])
 # empty-RTF presentation (strip lyric leaves) -> not a song
 empty = wire.parse(ag)
 for _, node in wire.find_rtf_leaves(empty):
@@ -246,8 +250,106 @@ for _, node in wire.find_rtf_leaves(empty):
 check("no-lyric presentation skipped",
       not song_gate.classify("/x/Empty.pro", wire.serialize(empty))[0])
 
-print("\n[reviewed] AI-review fingerprint gating (queue only changed songs)")
+print("\n[platform] Windows discovery and scheduler helpers")
 import tempfile  # noqa
+_orig_is_windows = config._is_windows
+_orig_is_macos = config._is_macos
+_orig_run = config.subprocess.run
+_orig_agent_run = agent.subprocess.run
+_orig_log_dir = config.log_dir
+_env_keys = ("USERPROFILE", "OneDrive", "OneDriveConsumer", "OneDriveCommercial",
+             "APPDATA", "LOCALAPPDATA", "PROGRAMDATA")
+_old_env = {k: os.environ.get(k) for k in _env_keys}
+try:
+    config._is_windows = lambda: True
+    config._is_macos = lambda: False
+    os.environ["USERPROFILE"] = "/win/Users/Worship"
+    os.environ["OneDrive"] = "/win/Users/Worship/OneDrive - Church"
+    os.environ["APPDATA"] = "/win/Users/Worship/AppData/Roaming"
+    os.environ["LOCALAPPDATA"] = "/win/Users/Worship/AppData/Local"
+    os.environ["PROGRAMDATA"] = "/win/ProgramData"
+
+    _roots = config._candidate_roots()
+    check("windows user Documents candidate",
+          os.path.join("/win/Users/Worship", "Documents",
+                       "ProPresenter") in _roots, _roots)
+    check("windows OneDrive Documents candidate",
+          os.path.join("/win/Users/Worship/OneDrive - Church", "Documents",
+                       "ProPresenter") in _roots, _roots)
+    check("windows AppData workspace candidate",
+          os.path.join("/win/Users/Worship/AppData/Roaming", "RenewedVision",
+                       "ProPresenter", "User Workspaces") in _roots, _roots)
+    eq("windows state dir uses LocalAppData",
+       config._state_dir(),
+       os.path.join("/win/Users/Worship/AppData/Local", "pro7_lyric_corrector"))
+    eq("sync folder detection is case-insensitive",
+       config.is_in_sync_folder("c:/users/worship/onedrive/songs"), "OneDrive")
+
+    class _RunResult:
+        def __init__(self, returncode=0, stdout="", stderr=""):
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
+    _calls = []
+
+    def _fake_tasklist(args, **kwargs):
+        _calls.append(args)
+        return _RunResult(stdout="ProPresenter.exe                 1234 Console")
+
+    config.subprocess.run = _fake_tasklist
+    check("windows detects running ProPresenter.exe",
+          config.is_propresenter_running(), _calls)
+
+    def _fake_tasklist_empty(args, **kwargs):
+        return _RunResult(stdout="INFO: No tasks are running.")
+
+    config.subprocess.run = _fake_tasklist_empty
+    check("windows sees ProPresenter closed",
+          not config.is_propresenter_running(), "")
+
+    def _fake_tasklist_error(args, **kwargs):
+        raise OSError("tasklist unavailable")
+
+    config.subprocess.run = _fake_tasklist_error
+    check("windows process detection fails closed",
+          config.is_propresenter_running(), "")
+
+    _task_calls = []
+    config.log_dir = lambda: tempfile.mkdtemp(prefix="pro7-win-log-")
+
+    def _fake_schtasks(args, **kwargs):
+        _task_calls.append(args)
+        return _RunResult()
+
+    agent.subprocess.run = _fake_schtasks
+    _installed = agent._install_windows_task(
+        "C:/Python/python.exe", "C:/Tools/pro7_lyric_corrector.py",
+        "C:/Users/Worship/Documents/ProPresenter", "Songs",
+        interval=7, override_while_open=True)
+    check("windows task install returns task name",
+          agent.TASK_NAME in _installed, _installed)
+    _task_cmd = _task_calls[0]
+    check("windows task uses schtasks create",
+          _task_cmd[:6] == ["schtasks", "/Create", "/TN", agent.TASK_NAME,
+                            "/TR", _task_cmd[5]], _task_cmd)
+    _tr = _task_cmd[_task_cmd.index("/TR") + 1]
+    check("windows task command runs watch with chosen options",
+          "watch" in _tr and "--interval 7" in _tr
+          and "--override-while-open" in _tr, _tr)
+finally:
+    config._is_windows = _orig_is_windows
+    config._is_macos = _orig_is_macos
+    config.subprocess.run = _orig_run
+    agent.subprocess.run = _orig_agent_run
+    config.log_dir = _orig_log_dir
+    for _key, _value in _old_env.items():
+        if _value is None:
+            os.environ.pop(_key, None)
+        else:
+            os.environ[_key] = _value
+
+print("\n[reviewed] AI-review fingerprint gating (queue only changed songs)")
 _p_ag = os.path.join(FIX, "amazing_grace.pro")
 _fp = reviewed.fingerprint(ag)
 check("fingerprint is stable for same bytes", _fp and _fp == reviewed.fingerprint(ag), _fp)

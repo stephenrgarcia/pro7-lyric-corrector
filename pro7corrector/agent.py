@@ -1,13 +1,17 @@
-"""macOS LaunchAgent install / start / stop / status for the always-on monitor."""
+"""Background-helper install / start / stop / status.
+
+macOS uses a LaunchAgent. Windows uses Task Scheduler. Both run the same
+`watch` command, so the correction engine and safety checks stay identical.
+"""
 
 from __future__ import annotations
 import os
 import subprocess
-import sys
 
 from . import config
 
 LABEL = "com.reach.pro7lyriccorrector"
+TASK_NAME = "Pro7LyricCorrector"
 
 
 def plist_path():
@@ -63,6 +67,11 @@ def build_plist(python_exe, script, root, library, interval=5,
 
 def install(python_exe, script, root, library, interval=5,
             override_while_open=False):
+    if config._is_windows():
+        return _install_windows_task(python_exe, script, root, library, interval,
+                                     override_while_open)
+    if not config._is_macos():
+        raise SystemExit("install-agent is supported on macOS and Windows only.")
     os.makedirs(os.path.dirname(plist_path()), exist_ok=True)
     os.makedirs(config.log_dir(), exist_ok=True)
     text = build_plist(python_exe, script, root, library, interval,
@@ -72,11 +81,47 @@ def install(python_exe, script, root, library, interval=5,
     return plist_path()
 
 
+def _watch_args(python_exe, script, root, library, interval=5,
+                override_while_open=False):
+    args = [python_exe, script, "watch",
+            "--root", root, "--library", library,
+            "--interval", str(interval)]
+    if override_while_open:
+        args.append("--override-while-open")
+    return args
+
+
+def _install_windows_task(python_exe, script, root, library, interval=5,
+                          override_while_open=False):
+    os.makedirs(config.log_dir(), exist_ok=True)
+    args = _watch_args(python_exe, script, root, library, interval,
+                       override_while_open)
+    command = subprocess.list2cmdline(args)
+    # The task launches at logon and the Python process keeps running because
+    # `watch` is the poll loop. Task Scheduler's minimum repeat interval is too
+    # coarse for our ~5s watcher, so do not use a repeating scheduled trigger.
+    r = subprocess.run(
+        ["schtasks", "/Create", "/TN", TASK_NAME, "/TR", command, "/SC",
+         "ONLOGON", "/F"],
+        capture_output=True, text=True)
+    if r.returncode != 0:
+        raise SystemExit((r.stderr or r.stdout or "schtasks create failed").strip())
+    return "Windows Task Scheduler task: %s" % TASK_NAME
+
+
 def _launchctl(*args):
     return subprocess.run(["launchctl", *args], capture_output=True, text=True)
 
 
 def start():
+    if config._is_windows():
+        r = subprocess.run(["schtasks", "/Run", "/TN", TASK_NAME],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            raise SystemExit((r.stderr or r.stdout or "schtasks run failed").strip())
+        return status()
+    if not config._is_macos():
+        raise SystemExit("start is supported on macOS and Windows only.")
     p = plist_path()
     if not os.path.exists(p):
         raise SystemExit("Plist not installed. Run install-agent first.")
@@ -91,6 +136,15 @@ def start():
 
 
 def stop():
+    if config._is_windows():
+        r = subprocess.run(["schtasks", "/End", "/TN", TASK_NAME],
+                           capture_output=True, text=True)
+        if r.returncode != 0 and "not currently running" not in (
+                (r.stderr or r.stdout or "").lower()):
+            raise SystemExit((r.stderr or r.stdout or "schtasks end failed").strip())
+        return "stopped"
+    if not config._is_macos():
+        raise SystemExit("stop is supported on macOS and Windows only.")
     p = plist_path()
     uid = os.getuid()
     r = _launchctl("bootout", "gui/%d/%s" % (uid, LABEL))
@@ -100,6 +154,19 @@ def stop():
 
 
 def status():
+    if config._is_windows():
+        r = subprocess.run(["schtasks", "/Query", "/TN", TASK_NAME, "/FO",
+                            "LIST", "/V"], capture_output=True, text=True)
+        if r.returncode != 0:
+            return "not installed"
+        state = None
+        for line in (r.stdout or "").splitlines():
+            if line.lower().startswith("status:"):
+                state = line.split(":", 1)[1].strip()
+                break
+        return "installed%s" % (("; %s" % state) if state else "")
+    if not config._is_macos():
+        return "unsupported platform"
     uid = os.getuid()
     r = _launchctl("print", "gui/%d/%s" % (uid, LABEL))
     if r.returncode == 0:

@@ -9,7 +9,7 @@ then follow the linked `README.md`, `docs/ARCHITECTURE.md`, and
 `docs/ROUTINE.md` guidance as relevant.
 
 Quick invariants:
-- Pure Python standard library only; use `/usr/bin/python3`.
+- Pure Python standard library only; use Python 3 (`/usr/bin/python3` on macOS; `py`/`python` on Windows).
 - Never add a pip dependency.
 - Run `python3 tests/run_tests.py` after code, parser, rules, or write-path changes.
 - Edit ProPresenter RTF leaves only, never stale sibling plain-text fields.

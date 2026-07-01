@@ -35,7 +35,7 @@ def classify(path: str, data: bytes = None):
     name = os.path.basename(path)
     if name.startswith("."):
         return False, "hidden file"
-    if not name.endswith(".pro"):
+    if not name.lower().endswith(".pro"):
         return False, "not a .pro file"
     if _SKIP_NAME.search(name):
         return False, "name matches non-song marker"
