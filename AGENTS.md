@@ -35,6 +35,11 @@ Python 3 standard library, **zero dependencies**.
 - Commands: `discover`, `inspect <file>`, `calibrate` (preview), `review`
   (approve one-by-one before writing), `apply-once`, `watch`, `install-agent`,
   `start`/`stop`/`status`, `ai-batch`, `--restore`.
+- Platform status: built and tested on macOS. Windows support exists and has
+  simulated tests for discovery, ProPresenter process detection, and Task
+  Scheduler setup, but has not yet been field-tested on a real Windows
+  ProPresenter install. If a Windows setup bug appears, help the user debug the
+  local path/process/scheduler issue in place.
 
 ## File map (pro7corrector/)
 - `wire.py` — zero-dependency protobuf wire-format codec (round-trips `.pro`).

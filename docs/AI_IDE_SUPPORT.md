@@ -42,3 +42,12 @@ short and point them back to `AGENTS.md` so rules do not drift.
 When project behavior changes, edit `AGENTS.md` first. Update an adapter only
 when a tool needs different front matter, a different path, or a shorter local
 summary. The optional worship-lyric AI pass always follows `docs/ROUTINE.md`.
+
+## Windows setup support
+
+The repo was built and tested on macOS. Windows support has been added by an
+AI-assisted coding pass and covered with simulated tests, but it has not yet
+been field-tested on a real Windows ProPresenter install. If a user hits a
+Windows setup issue, have the assistant read `README.md`, `AGENTS.md`, and
+`docs/ARCHITECTURE.md`, then debug the local root path, Python launcher,
+ProPresenter process check, or Task Scheduler command directly.

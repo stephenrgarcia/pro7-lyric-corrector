@@ -28,6 +28,14 @@ You'll need:
   run the Terminal commands for you; the copy/paste Terminal steps are still
   included below if you prefer to do it yourself.
 
+> **Windows note:** This was built and tested on a Mac. Windows support has
+> been added by an AI-assisted coding pass and covered with tests that simulate
+> Windows discovery, process detection, and Task Scheduler setup. I have not
+> personally tested it on a real Windows ProPresenter install yet, but the
+> AI-assisted build says it should run there too. If Windows setup hits a bug,
+> opening this folder in an AI IDE and pasting the error back in is a good first
+> move — it can read the repo and help patch the Windows setup path.
+
 That's it. No accounts, no internet connection required, no paid software for the
 core tool. (There's an **optional** AI step later that needs a local coding
 assistant that can read this folder and run commands — but the main tool works
@@ -133,6 +141,11 @@ commands on the computer that has your ProPresenter library. Good options includ
 Claude Code, Codex, Cursor, VS Code with GitHub Copilot, Windsurf, Cline, Roo
 Code, Continue, Gemini CLI, Qwen Code, Kiro, Junie, Devin, and
 Hermes-compatible workflows. Availability and pricing vary by tool.
+
+This is especially helpful for Windows right now: the Windows code path is
+implemented and test-covered, but it has not yet been field-tested on an actual
+Windows ProPresenter machine. If setup hits an edge case, an AI IDE can inspect
+the error, the local paths, and the repo code together.
 
 1. Download/unzip (or clone) this folder somewhere you'll remember, e.g. your
    Documents folder.
@@ -409,6 +422,10 @@ then `apply-once`. There are tests: `python3 tests/run_tests.py`.
 - **"`python3` / `py` says command not found."** On macOS, click **Install**
   if prompted for developer tools, then retry. On Windows, install Python 3 and
   reopen PowerShell.
+- **"Windows setup failed."** Windows support was added and tested through the
+  AI-assisted build, but has not yet been field-tested on a real Windows
+  ProPresenter install. Open this folder in an AI IDE, paste the exact error,
+  and ask it to read `README.md` and `AGENTS.md` before fixing the setup path.
 - **"It didn't touch some songs."** It only edits the **Songs** library and
   skips non-song files and songs with characters it can't safely re-encode (it
   logs why).

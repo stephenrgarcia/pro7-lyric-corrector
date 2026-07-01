@@ -54,6 +54,16 @@ that could drift. See the "deviation" note in `docs/HANDOFF.md`.
 | `agent.py` | macOS LaunchAgent or Windows Task Scheduler install/start/stop/status. |
 | `aibatch.py` | Optional AI pass: emit tasks, validate + apply proposals. |
 
+## Platform status
+
+The current implementation was built and tested on macOS. Windows support has
+been added by an AI-assisted coding pass and is covered by simulated tests for
+root discovery, `tasklist`-based ProPresenter detection, and Task Scheduler
+command generation. It has not yet been field-tested on a real Windows
+ProPresenter machine, so Windows setup bugs should be treated as fixable local
+path/process/scheduler issues rather than as a reason to rewrite the core file
+editing pipeline.
+
 ## The wire codec (`wire.py`)
 
 Length-delimited fields are heuristically classified as **sub-message** vs.
