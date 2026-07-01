@@ -138,9 +138,7 @@ always-on helper**.
 
 Use any local AI coding assistant that can read this folder and run Terminal
 commands on the computer that has your ProPresenter library. Good options include
-Claude Code, Codex, Cursor, VS Code with GitHub Copilot, Windsurf, Cline, Roo
-Code, Continue, Gemini CLI, Qwen Code, Kiro, Junie, Devin, and
-Hermes-compatible workflows. Availability and pricing vary by tool.
+Claude Code, Codex, Cursor, Gemini, etc.
 
 This is especially helpful for Windows right now: the Windows code path is
 implemented and test-covered, but it has not yet been field-tested on an actual
