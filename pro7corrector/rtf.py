@@ -25,6 +25,7 @@ before the first character) is also left untouched.
 `encode_run()` re-encodes a text run to ProPresenter's conventions:
   * line break  -> backslash + newline  (0x5C 0x0A)   [verified against library]
   * '{' '}' '\\' -> escaped
+  * non-breaking space (U+00A0) -> \\~                (RTF's own control symbol)
   * byte >= 0x80 -> \\'hh  (lowercase hex, cp1252)     [matches library]
 
 `splice()` rebuilds: rtf[:body_start] + reconstructed body + rtf[body_end:],
@@ -45,13 +46,13 @@ _DEST_WORDS = {
     "xmlnstbl", "filetbl", "revtbl", "protusertbl",
 }
 
-# Control symbols that emit a literal (ASCII-safe) character.
+# Control symbols that emit a literal character.
 _SYMBOL_CHARS = {
-    0x5C: "\\",   # \\  -> backslash
-    0x7B: "{",    # \{  -> {
-    0x7D: "}",    # \}  -> }
-    0x7E: " ",    # \~ -> (non-breaking) space, normalized to a regular space
-    0x5F: "-",    # \_ -> (non-breaking) hyphen, normalized to a regular hyphen
+    0x5C: "\\",       # \\  -> backslash
+    0x7B: "{",        # \{  -> {
+    0x7D: "}",        # \}  -> }
+    0x7E: " ",   # \~ -> non-breaking space (U+00A0, round-trips via encode_run)
+    0x5F: "-",        # \_ -> (non-breaking) hyphen, normalized to a regular hyphen
 }
 
 
@@ -249,6 +250,9 @@ def encode_run(text: str) -> bytes:
             continue
         if ch == "}":
             out += b"\\}"
+            continue
+        if ch == " ":
+            out += b"\\~"
             continue
         cp = ord(ch)
         if cp < 0x80:

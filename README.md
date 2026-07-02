@@ -82,6 +82,7 @@ These run automatically and are considered "safe" (rule-based):
 | God's names & titles always capitalized | `jesus`, `lord`, `king of kings`, `holy spirit` → `Jesus`, `Lord`, `King of Kings`, `Holy Spirit` |
 | Attributes always **lowercase** | `Grace`, `Glory`, `Mercy`, `the Cross` → `grace`, `glory`, `mercy`, `the cross` |
 | Tidy spacing | double spaces, trailing spaces, extra blank lines removed |
+| No orphan words | the last two words of every lyric line are joined with a non-breaking space, so if a line overflows the slide width, the last word wraps down *with* the word before it instead of alone on its own line. A line that's already a single word (e.g. the second line of a two-line slide) is left alone. |
 | Song title cleaned | the name shown in ProPresenter's library is set to the file's name (so no more `Untitled` or typo'd titles) |
 
 **Left for the optional AI pass (flagged, never guessed):**
