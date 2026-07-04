@@ -169,6 +169,25 @@ check("ambiguous flagged", any("spirit" in f for f in r.flags), r.flags)
 r2 = rules.correct_text("You are good\nYour mercy")
 check("already-correct -> no change", not r2.changed)
 
+print("\n[rules] orphan-word guard (non-breaking space, not part of correct_text)")
+NBSP = rules.NBSP
+eq("last two words joined by NBSP",
+   rules.prevent_orphans("amazing grace how sweet the sound"),
+   "amazing grace how sweet the sound")
+eq("single-word line left alone (no last-two-words to join)",
+   rules.prevent_orphans("Grace"), "Grace")
+eq("two-line slide: multi-word line joined, lone second word untouched",
+   rules.prevent_orphans("how sweet the sound\nGrace"),
+   "how sweet the sound\nGrace")
+eq("blank lines preserved", rules.prevent_orphans("a b\n\nc d"),
+   "a b\n\nc d")
+eq("empty text untouched", rules.prevent_orphans(""), "")
+_orphan_once = rules.prevent_orphans("amazing grace how sweet the sound")
+eq("idempotent (already-NBSP line unchanged)",
+   rules.prevent_orphans(_orphan_once), _orphan_once)
+eq("extra internal spacing still finds the last gap",
+   rules.prevent_orphans("a  b   c"), "a  b c")
+
 print("\n[rtf] codec round-trip & no-op identity")
 ag = open(os.path.join(FIX, "amazing_grace.pro"), "rb").read()
 tree = wire.parse(ag)
@@ -196,6 +215,10 @@ eq("rtf cp1252 decode",
 eq("rtf u2028 as break",
    rtf.extract(b"{\\rtf1\\fs152 a\\uc0\\u8232 b}").text, "a\nb")
 eq("smart apostrophe encodes to \\'92", rtf.encode_run("it’s"), b"it\\'92s")
+eq("rtf \\~ decodes to a non-breaking space",
+   rtf.extract(b"{\\rtf1\\fs152 a\\~b}").text, "a" + NBSP + "b")
+eq("non-breaking space encodes back to \\~",
+   rtf.encode_run("a" + NBSP + "b"), b"a\\~b")
 
 print("\n[pipeline] preservation & verification")
 res = presentation.process_bytes(ag)
@@ -215,6 +238,25 @@ check("idempotent (2nd pass no change)", not res2.changed)
 ag2 = presentation.process_bytes(ag).new_bytes or ag   # correct once
 check("idempotent: a corrected file produces no further write",
       presentation.process_bytes(ag2).new_bytes is None)
+
+print("\n[pipeline] orphan-word guard applied end-to-end")
+nt2 = wire.parse(res.new_bytes)
+_orphan_leaf_texts = [rtf.extract(node[2]).text
+                      for _, node in wire.find_rtf_leaves(nt2)]
+_orphan_lines = [ln for t in _orphan_leaf_texts for ln in t.split("\n") if ln.strip()]
+check("every multi-word lyric line ends in a non-breaking space join",
+      _orphan_lines and all(NBSP in ln for ln in _orphan_lines), _orphan_lines)
+eq("last two words of the first line are NBSP-joined",
+   _orphan_leaf_texts[0].split("\n")[0],
+   "Amazing grace how sweet the" + NBSP + "sound")
+_no_guard = presentation.process_bytes(ag, cfg=rules.Config(nbsp_orphan=False))
+_no_guard_first_line = rtf.extract(
+    wire.find_rtf_leaves(wire.parse(_no_guard.new_bytes))[0][1][2]
+).text.split("\n")[0]
+check("cfg.nbsp_orphan=False still corrects capitalization",
+      _no_guard.changed)
+eq("cfg.nbsp_orphan=False leaves plain spaces (no NBSP join)",
+   _no_guard_first_line, "Amazing grace how sweet the sound")
 
 print("\n[title] internal title set to filename, structure preserved")
 # force a wrong title into the Amazing Grace fixture, then correct it back

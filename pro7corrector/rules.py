@@ -196,7 +196,7 @@ class Config:
     # human ("you who boast") is context-dependent, so it is left to the AI pass.
     def __init__(self, divine_second_person=False, allcaps=True, spelling=True,
                  smart_punct=True, midline=True, typos=True, divine=True,
-                 fix_title=True, intercaps=True):
+                 fix_title=True, intercaps=True, nbsp_orphan=True):
         self.divine_second_person = divine_second_person
         self.allcaps = allcaps
         self.spelling = spelling
@@ -206,6 +206,10 @@ class Config:
         self.divine = divine
         self.fix_title = fix_title       # set internal title to the filename
         self.intercaps = intercaps       # lowercase stray mid-word capitals
+        # join a line's last two words with a non-breaking space so the
+        # renderer never wraps a lone orphan word onto its own line; applied
+        # by presentation.process_bytes, not by correct_text (see prevent_orphans).
+        self.nbsp_orphan = nbsp_orphan
 
 
 DEFAULT = Config()
@@ -450,6 +454,46 @@ def _collapse_spaces(line: str, notes):
     if new != line:
         notes.append("spacing")
     return new
+
+
+# ---------------------------------------------------------------------------
+# Orphan-word guard (slide line-wrap, not grammar) -- deliberately NOT part of
+# correct_line/correct_text. It is applied once, on the fully corrected text,
+# by presentation.process_bytes. Keeping it out of correct_text means the
+# grammar/capitalization rule tests above stay exact-string comparisons
+# against plain ASCII spaces.
+# ---------------------------------------------------------------------------
+
+NBSP = " "
+
+# Matches "<head><gap><tail>" where <gap> is the LAST run of plain space/tab
+# on the line: greedy backtracking makes this the rightmost whitespace gap,
+# i.e. the boundary between the line's last two words.
+_LAST_WORD_GAP_RE = re.compile(r"^(?P<head>.*[^ \t ])[ \t]+(?P<tail>[^ \t ]+)$")
+
+
+def _prevent_orphan_line(line: str) -> str:
+    """Glue the last two words of a single slide line with a non-breaking
+    space, so ProPresenter's renderer can never wrap the final word onto its
+    own line when the line overflows the slide width.
+
+    A line with zero or one word (e.g. a lone second line on a two-line
+    slide) has no "last two words" to join, so it is left untouched -- it
+    stays on its own line exactly as authored.
+    """
+    m = _LAST_WORD_GAP_RE.match(line)
+    if not m:
+        return line
+    return m.group("head") + NBSP + m.group("tail")
+
+
+def prevent_orphans(text: str) -> str:
+    """Apply `_prevent_orphan_line` to every line of (possibly multi-line,
+    SENTINEL-marked) logical text. Blank lines are left as-is."""
+    lines = text.split("\n")
+    return "\n".join(
+        _prevent_orphan_line(ln) if ln.strip() else ln for ln in lines
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -23,6 +23,8 @@ with zero third-party dependencies.
   (`0x5C 0x0A`), or a Unicode **line separator** (`\uc0\u8232`, U+2028). Both are handled.
 - Smart punctuation is **cp1252-escaped**, not raw Unicode: `’`=`\'92`,
   `“`=`\'93`, `”`=`\'94`, en/em dash = `\'96`/`\'97`.
+- A non-breaking space is RTF's own `\~` control symbol (decoded to U+00A0,
+  re-encoded back to `\~`), not a cp1252 escape.
 
 ## Why a stdlib wire codec instead of the GreyShirtGuy `.proto`
 
@@ -119,9 +121,14 @@ and other formatting; now only **7** genuine special-glyph payloads are skipped.
 `process_bytes(data, cfg, desired_title)`:
 
 1. Plan a **title fix** (field 3 → filename) if it differs.
-2. For each non-empty, clean RTF leaf: correct `.coded`, collect flags, skip if
-   the length delta is suspicious or the splice no longer fits the segment
-   structure.
+2. For each non-empty, clean RTF leaf: correct `.coded`, collect flags, then
+   (when `cfg.nbsp_orphan`) run `rules.prevent_orphans` over the corrected
+   text to join each line's last two words with a non-breaking space
+   (U+00A0) — this keeps a slide's renderer from wrapping a lone orphan word
+   onto its own line. It is a separate pass, not part of `correct_text`, so it
+   never touches a line that is already a single word (e.g. the second line
+   of a two-line slide). Skip if the length delta is suspicious or the splice
+   no longer fits the segment structure.
 3. Apply all splices (+ title) to a fresh tree, serialize.
 4. **Verify** and only then return `new_bytes`:
    - Blank every RTF leaf (and the title, if changed) to empty in **both** the

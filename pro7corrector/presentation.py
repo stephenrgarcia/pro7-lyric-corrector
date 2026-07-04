@@ -167,20 +167,29 @@ def process_bytes(data: bytes, cfg: rules.Config = rules.DEFAULT,
         for fl in cr.flags:
             if fl not in res.flags:
                 res.flags.append(fl)
-        if not cr.changed:
+        new_coded = cr.text
+        notes = cr.notes
+        changed = cr.changed
+        if cfg.nbsp_orphan:
+            guarded = rules.prevent_orphans(new_coded)
+            if guarded != new_coded:
+                new_coded = guarded
+                notes = notes + ["nbsp-orphan-guard"]
+                changed = True
+        if not changed:
             continue
         old_display = parsed.text
-        new_display = rtf.display(cr.text)
+        new_display = rtf.display(new_coded)
         if _suspicious(old_display, new_display):
             res.skipped_suspicious += 1
             continue
         # Confirm the corrected text still splices (segment structure intact).
-        if rtf.splice(payload, cr.text, parsed) is None:
+        if rtf.splice(payload, new_coded, parsed) is None:
             res.skipped_suspicious += 1
             continue
         intended[idx] = new_display
-        coded_edits[idx] = cr.text
-        res.changes.append(SlideChange(idx, old_display, new_display, cr.notes))
+        coded_edits[idx] = new_coded
+        res.changes.append(SlideChange(idx, old_display, new_display, notes))
 
     if not intended and not res.title_change:
         res.changed = False
