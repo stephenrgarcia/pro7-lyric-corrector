@@ -3,7 +3,7 @@
 **A free tool that automatically cleans up the lyrics in your ProPresenter 7
 song library — and keeps them clean — so your screens look consistent every
 week.** No more random ALL-CAPS lines, "your" where it should be "Your" (and
-vice-versa), `colour`/`Saviour`, stray Capitals In The Middle of lines, or
+vice-versa), American spellings when you want British (and vice versa), stray Capitals In The Middle of lines, or
 twelve different ways of writing the same chorus.
 
 Run it once, review changes before writing, or let it run quietly in the
