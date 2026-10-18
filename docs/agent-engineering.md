@@ -4,11 +4,11 @@
 
 Use this guide as the default coding route when this repository adopts it. Choose useful steps from the task; the user need not select a skill for every step. Applicable repository instructions, user scope, and active harness rules take priority. A small clear fix needs less ceremony than a new product capability.
 
-## Start from this checkout
+## Start from this checkout's local installation
 
-The installation keeps its source here: `skills/mattpocock/`, `skills/pstack/upstream/`, the [pstack adapter](../skills/pstack/AIOS-ADAPTER.md), and local skill entrypoints. Read local files rather than borrowing a live installation from another checkout. A repository clone carries checked-in source to another machine; tools, credentials, native registration, and running services still need verification.
+Git tracks this workflow guidance. New skill bundles are local tool installations, excluded from Git and transferred directly between machines over SSH. They must remain self-contained within this checkout; another live repository is not a runtime dependency. A fresh clone needs its local skill installation before those skills can run. File presence, native discovery, and an executed workflow are different claims.
 
-Read applicable `AGENTS.md`/`CLAUDE.md`, contribution/test instructions, and relevant project docs first. Inspect installed skill folders, `SKILL.md` bodies, and version notes before choosing a skill. Physical `.agents/skills/` or `.claude/skills/` entries may contain an older Matt snapshot: resolve the actual entrypoint and source. Do not silently replace registrations or mix incompatible generations within one phase. Where no native entrypoint is registered, read the local vendored source directly within the harness's invocation rules.
+Read applicable `AGENTS.md`/`CLAUDE.md`, contribution/test instructions, and relevant project docs first. Resolve the actual `.agents/skills/` or `.claude/skills/` entrypoint and inspect its `SKILL.md`, version notes, and supporting files. The local bundle may live in `skills/` or the ignored `.agents/.portable-engineering/` cache. Existing Matt snapshots remain authoritative; do not replace them silently. Read the pstack adapter next to its local source before invoking pstack. If a required local skill is absent, use a scoped available equivalent and state the limitation rather than borrowing from another repository or claiming it ran.
 
 Matt versions vary. The inspected 38-skill snapshot includes the names below; this map does not promise every checkout has them. Older versions may use names such as `to-prd` or `to-issues`: inspect their actual contracts rather than assuming aliases. If a skill is absent, use an available equivalent or the scoped ordinary workflow, state the substitution, and never claim the missing skill ran. Installation/upgrades are separate work.
 
@@ -43,6 +43,6 @@ Review against a pinned baseline and actual originating spec. Matt's review pres
 
 ## Harness and learning boundaries
 
-Read the [local adapter](../skills/pstack/AIOS-ADAPTER.md) before pstack source. Use actual tools and authorized model settings; report unavailable isolation/review diversity honestly. Use `heavy-run` only where available/applicable or required, or the repo's prescribed equivalent. No wrapper in another repository is a runtime prerequisite.
+Resolve and read the installed local pstack adapter before its source. Use actual tools and authorized model settings; report unavailable isolation/review diversity honestly. Use `heavy-run` only where available/applicable or required, or the repo's prescribed equivalent. No wrapper in another repository is a runtime prerequisite.
 
 Coding does not automatically enter tutor mode. If the user asks to learn and this repo already has a tutor/course contract, preserve its progress and pacing. Matt `teach` and `pstack-teach` differ: pstack explains through how/why and avoids quizzes. Use it as explanation grounding without overriding an existing feedback contract. With no tutor/course, explain as requested without inventing learner records or requiring a course elsewhere.
