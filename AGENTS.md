@@ -100,3 +100,11 @@ Keep this file as the source of truth. Compatibility starters should stay short
 and point back here so rules do not drift between tools. When adding or changing
 project guidance, update `AGENTS.md` first, then only adjust adapters if a tool
 needs different front matter or file placement.
+
+
+<!-- portable-engineering-skills:start -->
+## Agent engineering skills
+
+Before coding work, read [docs/agent-engineering.md](docs/agent-engineering.md). Use the repository-local versions and namespaced pstack entries; existing task, authorization, and release rules still govern.
+@docs/agent-engineering.md
+<!-- portable-engineering-skills:end -->
