@@ -14,3 +14,11 @@ Quick invariants:
   fail-soft `EDIT-LOG.md` logging.
 - For the optional lyric AI pass, follow `docs/ROUTINE.md` exactly and apply
   proposals only through `python3 pro7_lyric_corrector.py ai-batch --apply ...`.
+
+
+<!-- portable-engineering-skills:start -->
+## Agent engineering skills
+
+Before coding work, read [docs/agent-engineering.md](docs/agent-engineering.md). Use the repository-local versions and namespaced pstack entries; existing task, authorization, and release rules still govern.
+@docs/agent-engineering.md
+<!-- portable-engineering-skills:end -->
