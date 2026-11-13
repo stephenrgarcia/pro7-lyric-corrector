@@ -101,10 +101,6 @@ and point back here so rules do not drift between tools. When adding or changing
 project guidance, update `AGENTS.md` first, then only adjust adapters if a tool
 needs different front matter or file placement.
 
+## Shared context
 
-<!-- portable-engineering-skills:start -->
-## Agent engineering skills
-
-Before coding work, read [docs/agent-engineering.md](docs/agent-engineering.md). Use the repository-local versions and namespaced pstack entries; existing task, authorization, and release rules still govern.
-@docs/agent-engineering.md
-<!-- portable-engineering-skills:end -->
+Shared skills come from `agent-skills` (installed per machine); before coding work, use its `engineering-route` skill. Stephen's home repo is `aios`.
